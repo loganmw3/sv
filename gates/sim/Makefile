@@ -21,52 +21,60 @@ or:
 	$(MAKE) --no-print-directory -f Makefile sim \
 		SIM_BUILD=sim_build_or \
 		COCOTB_TOPLEVEL=or_gate \
-		COCOTB_TEST_MODULES=test_or_gate \
+		COCOTB_TEST_MODULES=test_gates \
+		COCOTB_TEST_FILTER=test_or_gate \
 		EXTRA_ARGS="--trace --trace-fst --top-module or_gate"
 
 and:
 	$(MAKE) --no-print-directory -f Makefile sim \
 		SIM_BUILD=sim_build_and \
 		COCOTB_TOPLEVEL=and_gate \
-		COCOTB_TEST_MODULES=test_and_gate \
+		COCOTB_TEST_MODULES=test_gates \
+		COCOTB_TEST_FILTER=test_and_gate \
 		EXTRA_ARGS="--trace --trace-fst --top-module and_gate"
 
 xor:
 	$(MAKE) --no-print-directory -f Makefile sim \
 		SIM_BUILD=sim_build_xor \
 		COCOTB_TOPLEVEL=xor_gate \
-		COCOTB_TEST_MODULES=test_xor_gate \
+		COCOTB_TEST_MODULES=test_gates \
+		COCOTB_TEST_FILTER=test_xor_gate \
 		EXTRA_ARGS="--trace --trace-fst --top-module xor_gate"
 
 not:
 	$(MAKE) --no-print-directory -f Makefile sim \
 		SIM_BUILD=sim_build_not \
 		COCOTB_TOPLEVEL=not_gate \
-		COCOTB_TEST_MODULES=test_not_gate \
+		COCOTB_TEST_MODULES=test_gates \
+		COCOTB_TEST_FILTER=test_not_gate \
 		EXTRA_ARGS="--trace --trace-fst --top-module not_gate"
 
 nand:
 	$(MAKE) --no-print-directory -f Makefile sim \
 		SIM_BUILD=sim_build_nand \
 		COCOTB_TOPLEVEL=nand_gate \
-		COCOTB_TEST_MODULES=test_nand_gate \
+		COCOTB_TEST_MODULES=test_gates \
+		COCOTB_TEST_FILTER=test_nand_gate \
 		EXTRA_ARGS="--trace --trace-fst --top-module nand_gate"
 
 nor:
 	$(MAKE) --no-print-directory -f Makefile sim \
 		SIM_BUILD=sim_build_nor \
 		COCOTB_TOPLEVEL=nor_gate \
-		COCOTB_TEST_MODULES=test_nor_gate \
+		COCOTB_TEST_MODULES=test_gates \
+		COCOTB_TEST_FILTER=test_nor_gate \
 		EXTRA_ARGS="--trace --trace-fst --top-module nor_gate"
+
 xnor:
 	$(MAKE) --no-print-directory -f Makefile sim \
 		SIM_BUILD=sim_build_xnor \
 		COCOTB_TOPLEVEL=xnor_gate \
-		COCOTB_TEST_MODULES=test_xnor_gate \
+		COCOTB_TEST_MODULES=test_gates \
+		COCOTB_TEST_FILTER=test_xnor_gate \
 		EXTRA_ARGS="--trace --trace-fst --top-module xnor_gate"
 
 
 all: or and xor not nand nor xnor
 
-clean:
-	rm -rf sim_build_or sim_build_and sim_build_xor sim_build_not sim_build_nand sim_build_nor sim_build_xnor dump_or.fst dump_and.fst dump_xor.fst results.xml dump.fst 
+clean_all:
+	rm -rf sim_build_or sim_build_and sim_build_xor sim_build_not sim_build_nand sim_build_nor sim_build_xnor results.xml dump.fst 
