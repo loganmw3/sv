@@ -1,6 +1,0 @@
-<testsuites name="results">
-  <testsuite name="all" package="all">
-    <property name="random_seed" value="1766613004" />
-    <testcase name="test_or_gate" classname="test_or_gate" file="/Users/loganwonnacott/Desktop/sv/or_gate/sim/test_or_gate.py" lineno="4" time="0.0002510547637939453" sim_time_ns="4.0" ratio_time="15932.778727445395" />
-  </testsuite>
-</testsuites>
