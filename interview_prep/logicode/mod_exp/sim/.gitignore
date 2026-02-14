@@ -1,0 +1,5 @@
+__pycache__/
+sim_build_*/
+results.xml
+sim_build/
+dump.fst
