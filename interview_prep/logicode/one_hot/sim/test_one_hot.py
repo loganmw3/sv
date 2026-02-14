@@ -5,9 +5,8 @@ import random
 MASK32 = 0xFFFFFFFF
 DATA_WIDTH = 32
 
-def generate_candidate(seed):
-    random.seed(seed)
-    candidate = 0 & MASK32
+def generate_candidate():
+    candidate = 0
     loops = random.randint(0,DATA_WIDTH-1)
     for _ in range(loops):
         one_hot = (1 << random.randint(0,DATA_WIDTH-1))
@@ -23,9 +22,9 @@ def determine_one_hot(candidate):
 async def test_one_hot(dut):
     random.seed(0) # Used to replicate results
     
-    din_vals = tuple(generate_candidate(i) for i in range(100))
     
-    for din in din_vals:
+    for _ in range(100):
+        din = generate_candidate()
         dut.din.value = din
         
         await Timer(1, unit="ns")
