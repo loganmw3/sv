@@ -18,4 +18,4 @@ example:
 all: example
 
 clean_all:
-	rm -rf sim_build_example dump.fst
+	rm -rf sim_build_example dump.fst results.xml
