@@ -50,7 +50,7 @@ def write_testbench(sim_dir: Path, name: str) -> Path:
     content = f"""
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import RisingEdge, ClockCycles
+from cocotb.triggers import RisingEdge, ClockCycles, Timer
 import random
 import numpy as np
 
