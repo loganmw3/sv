@@ -96,10 +96,10 @@ async def test_systolic_array(dut):
 
 
         assert ___ == ___, (
-            f"Trial {t} mismatch\n"
-            f"A={A}\n"
-            f"Expected: ___={}\n"
-            f"Got:      ___={}"
+            f"Trial  mismatch\n"
+            f"A=\n"
+            f"Expected: ___=\n"
+            f"Got:      ___="
         )
 """
     tb_path.write_text(content, encoding="utf-8")
