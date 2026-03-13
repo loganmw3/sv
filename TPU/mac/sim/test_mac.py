@@ -53,8 +53,6 @@ async def test_mac(dut):
         dut.a_in.value = mat.a
         dut.b_in.value = mat.b
 
-        # await RisingEdge(dut.clk)
-        # await FallingEdge(dut.clk)
         # I think this might be better practice than the other way
         await ClockCycles(dut.clk, 2)
 
