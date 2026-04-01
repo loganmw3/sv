@@ -1,8 +1,8 @@
-1. Simple Router
-2. Second Largest
+1. Simple Router (tb done)
+2. Second Largest (tb done)
 3. Rounding Division
 4. Grady Code Counter
-5. Reversing Bits
+5. Reversing Bits (tb done)
 6. Edge Detector
 7. Parallel-in, Serial-out Shift Register
 8. Serial-in, Parallel-out Shift Register
@@ -20,7 +20,7 @@
 20. Divide-by-Evens Clock Divider
 21. FizzBuzz
 22. Full Adder
-23. Basic ALU
+23. Basic ALU (tb done)
 24. Ripple Carry Adder
 25. Flip-Flop Array
 26. Multi-Bit FIFO
