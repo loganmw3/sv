@@ -26,6 +26,7 @@ STORE C
 So Config would look something like this (we are going to say ISA is 64 Bits)
 Bits [63:59] 5 bits for Opcode (allows for 32 instructions) (Congig Opcode (10001))
 Bits [58:56] Target Scratchpad (for now we will do 0=A, 1=B, 2=C)
+Bits [47:16] Data Pointer
 Bits [15:8] Config rows 8bits
 Bits [7:0] Config cols 8bits
 All other bits reserved [55:16]
