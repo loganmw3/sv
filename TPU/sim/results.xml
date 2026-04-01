@@ -1,0 +1,6 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1775081519" />
+    <testcase name="test_config_and_load" classname="test_load" file="/Users/loganwonnacott/Desktop/sv/TPU/tests/test_load.py" lineno="45" time="0.0007259845733642578" sim_time_ns="220.0" ratio_time="303036.7422003284" />
+  </testsuite>
+</testsuites>
