@@ -32,9 +32,11 @@ import types::*;
 // Local Parameters
 localparam IDLE = 0, CONFIGURE = 1;
 localparam LOAD_META_REQ = 2, LOAD_META_WAIT = 3, LOAD_READ_REQ = 4, LOAD_READ_WAIT = 5, LOAD_WRITE = 6;
-localparam STORE_READ_SPAD = 7, STORE_MEM_WRITE = 8;
-localparam GEMM_PREP = 9, GEMM_RUN = 10, GEMM_WAIT_DONE = 11;
-localparam COMMIT = 12;
+localparam STORE_META_REQ  = 7, STORE_META_WAIT = 8, STORE_READ_SPAD = 9, STORE_MEM_WRITE = 10;
+localparam GEMM_PREP = 11, GEMM_RUN = 12, GEMM_WAIT_DONE = 13;
+localparam COMMIT = 14;
+
+localparam NUM_STATES = 15;
 
 localparam OPCODE_CONFIG = 5'b10001;
 localparam OPCODE_LOAD   = 5'b00111;
@@ -42,7 +44,7 @@ localparam OPCODE_STORE  = 5'b00110;
 localparam OPCODE_GEMM   = 5'b11111;
 
 // State Machine
-logic [3:0] state, state_next;
+logic [$clog2(NUM_STATES)-1:0] state, state_next;
 
 // CONFIG Stuff
 logic                         meta_mem_wen;
@@ -76,10 +78,22 @@ logic [7:0]                   spad_rdata;
 always_ff @(posedge clk) begin : state_machine_ff
     if(rst) begin
         state <= IDLE;
+        load_spad_reg  <= '0;
+        load_ptr_reg   <= '0;
+        load_rows_reg  <= '0;
+        load_cols_reg  <= '0;
+        load_total_reg <= '0;
+        load_idx_reg   <= '0;
+        load_data_reg  <= '0;
     end else begin
         state <= state_next;
-        if (state == LOAD_META_WAIT) begin
-            load_spad_reg  <= instruction[58:56];
+
+        if (state == LOAD_META_REQ || state == STORE_META_REQ) begin
+            load_spad_reg <= instruction[58:56];
+        end
+
+
+        if (state == LOAD_META_WAIT || state == STORE_META_WAIT) begin
             load_ptr_reg   <= meta_mem_rdata.ptr;
             load_rows_reg  <= meta_mem_rdata.rows;
             load_cols_reg  <= meta_mem_rdata.cols;
@@ -89,7 +103,7 @@ always_ff @(posedge clk) begin : state_machine_ff
 
         if (state == LOAD_READ_WAIT && mem_rvalid) load_data_reg <= mem_rdata;
 
-        if (state == LOAD_WRITE) load_idx_reg <= load_idx_reg + 1'b1;
+        if (state == LOAD_WRITE || state == STORE_MEM_WRITE) load_idx_reg <= load_idx_reg + 1'b1;
 
 
     end
@@ -142,9 +156,9 @@ always_comb begin : state_machine_comb
         OPCODE_LOAD: begin // LOAD
         state_next = LOAD_META_REQ;
         end
-        // OPCODE_STORE: begin // STORE
-
-        // end
+        OPCODE_STORE: begin // STORE
+        state_next = STORE_META_REQ;
+        end
         // OPCODE_GEMM: begin // GEMM
 
         // end
@@ -195,9 +209,38 @@ always_comb begin : state_machine_comb
         end
 
     end
-    // STORE: begin
+    STORE_META_REQ: begin
+        meta_mem_ren   = 1'b1;
+        meta_mem_raddr = instruction[58:56];
+        state_next     = STORE_META_WAIT;
+    end
 
-    // end
+    STORE_META_WAIT: begin
+        state_next = STORE_READ_SPAD;
+    end
+    
+    STORE_READ_SPAD: begin
+        spad_ren   = 1'b1;
+        spad_rspad = load_spad_reg;
+        spad_raddr = load_idx_reg[$clog2(SPAD_DEPTH)-1:0];
+        state_next = STORE_MEM_WRITE;
+    end
+
+    STORE_MEM_WRITE: begin
+        mem_wen   = 1'b1;
+        mem_waddr = load_ptr_reg + {16'd0, load_idx_reg};
+        mem_wdata = spad_rdata;
+
+        if (load_idx_reg + 16'd1 >= load_total_reg) begin
+            state_next = COMMIT;
+        end else begin
+            state_next = STORE_READ_SPAD;
+        end
+    end
+
+
+
+
     // MATMUL: begin
 
     // end
