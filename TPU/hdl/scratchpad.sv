@@ -8,15 +8,15 @@ module scratchpad #(
     input  logic                              spad_wen,
     input  logic [$clog2(NUM_SPADS)-1:0]      spad_wspad,
     input  logic [$clog2(SPAD_DEPTH)-1:0]     spad_waddr,
-    input  logic [7:0]                        spad_wdata,
+    input  logic [31:0]                        spad_wdata,
 
     input  logic                              spad_ren,
     input  logic [$clog2(NUM_SPADS)-1:0]      spad_rspad,
     input  logic [$clog2(SPAD_DEPTH)-1:0]     spad_raddr,
-    output logic [7:0]                        spad_rdata
+    output logic [31:0]                        spad_rdata
 );
 
-    logic [7:0] spad_mem [NUM_SPADS][SPAD_DEPTH];
+    logic [31:0] spad_mem [NUM_SPADS][SPAD_DEPTH];
 
     always_ff @(posedge clk) begin
         if (rst) begin
