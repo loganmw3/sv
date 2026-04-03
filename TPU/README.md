@@ -70,3 +70,15 @@ Im going to need metadata registers for the scratchpad that holds the config row
 Im going to need a FSM to tell which state we are in.
 Im also going to need some way to feed the systolic array (I believe this is going to be a big hurdle)
 Also going to need a way to write back from the systolic array into the scratchpad
+
+Some things I eventually want to fix/change (In no specific order)
+
+1. The memory system. Right now it is "Magic" Meaning 1 cycle response time always. Meaning the scratchpads arent really doing anything right now in terms of efficiency.
+2. Parameterize the entire thing. (Atleast as much as I can)
+3. Create a better interface for running code (lexer maybe idrk)
+4. More Ops/control flow
+5. Pipeline it (Error checks. Prolly going to need a global stall because of sys array time)
+6. End goal is to run MNIST digits
+7. Add/use valid bits for power
+8. Maybe on a load also store into the stage and mark it somehow
+9. Update the widths. (truncated to 8b)

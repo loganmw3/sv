@@ -7,6 +7,8 @@ PROJ := $(abspath $(PWD)/..)
 VERILOG_SOURCES += $(PROJ)/pkg/types.sv
 VERILOG_SOURCES += $(PROJ)/hdl/metadata_regs.sv
 VERILOG_SOURCES += $(PROJ)/hdl/scratchpad.sv
+VERILOG_SOURCES += $(PROJ)/hdl/systolic_array.sv
+VERILOG_SOURCES += $(PROJ)/hdl/mac.sv
 VERILOG_SOURCES += $(PROJ)/hdl/tpu.sv
 
 TOPLEVEL = tpu
@@ -25,3 +27,9 @@ test_config:
 
 test_load:
 	$(MAKE) --no-print-directory sim COCOTB_TEST_MODULES=test_load
+
+test_store:
+	$(MAKE) --no-print-directory sim COCOTB_TEST_MODULES=test_store
+
+test_gemm:
+	$(MAKE) --no-print-directory sim COCOTB_TEST_MODULES=test_gemm

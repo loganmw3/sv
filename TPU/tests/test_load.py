@@ -52,6 +52,12 @@ async def test_config_and_load(dut):
         0x101: 0x22,
         0x102: 0x33,
         0x103: 0x44,
+        0x104: 0x55,
+        0x105: 0x66,
+        0x106: 0x77,
+        0x107: 0x88,
+        0x108: 0x99,
+        
     }
 
     # Reset / defaults
@@ -69,7 +75,7 @@ async def test_config_and_load(dut):
     # 1) CONFIG scratchpad 1
     # ptr = 0x100, rows=2, cols=2
     # -------------------------
-    encode_instruction = encode_config(target_spad=1, ptr=0x100, rows=2, cols=2)
+    encode_instruction = encode_config(target_spad=1, ptr=0x100, rows=3, cols=3)
     dut.instruction.value = encode_instruction
 
     await wait_for_signal(dut.commit_en, dut.clk)
@@ -77,8 +83,8 @@ async def test_config_and_load(dut):
     raw_meta = int(dut.metadata_regs_i.meta_mem[1].value)
     rows, cols, ptr, valid = unpack_spad_meta(raw_meta)
 
-    assert rows == 2, f"rows mismatch: got {rows}"
-    assert cols == 2, f"cols mismatch: got {cols}"
+    assert rows == 3, f"rows mismatch: got {rows}"
+    assert cols == 3, f"cols mismatch: got {cols}"
     assert ptr == 0x100, f"ptr mismatch: got {hex(ptr)}"
     assert valid == 1, f"valid mismatch: got {valid}"
 
@@ -123,11 +129,21 @@ async def test_config_and_load(dut):
     got1 = int(dut.sp_i.spad_mem[1][1].value)
     got2 = int(dut.sp_i.spad_mem[1][2].value)
     got3 = int(dut.sp_i.spad_mem[1][3].value)
+    got4 = int(dut.sp_i.spad_mem[1][4].value)
+    got5 = int(dut.sp_i.spad_mem[1][5].value)
+    got6 = int(dut.sp_i.spad_mem[1][6].value)
+    got7 = int(dut.sp_i.spad_mem[1][7].value)
+    got8 = int(dut.sp_i.spad_mem[1][8].value)
 
     assert got0 == 0x11, f"spad[1][0] expected 0x11, got {hex(got0)}"
     assert got1 == 0x22, f"spad[1][1] expected 0x22, got {hex(got1)}"
     assert got2 == 0x33, f"spad[1][2] expected 0x33, got {hex(got2)}"
     assert got3 == 0x44, f"spad[1][3] expected 0x44, got {hex(got3)}"
+    assert got4 == 0x55, f"spad[1][4] expected 0x55, got {hex(got4)}"
+    assert got5 == 0x66, f"spad[1][5] expected 0x66, got {hex(got5)}"
+    assert got6 == 0x77, f"spad[1][6] expected 0x77, got {hex(got6)}"
+    assert got7 == 0x88, f"spad[1][7] expected 0x88, got {hex(got7)}"
+    assert got8 == 0x99, f"spad[1][8] expected 0x99, got {hex(got8)}"
 
     # commit should fall on the next cycle
     dut.instruction.value = 0
