@@ -42,7 +42,7 @@ def encode_gemm(spad_a: int, spad_b: int, spad_c: int) -> int:
     )
 
 
-async def wait_for_commit(dut, timeout=200):
+async def wait_for_commit(dut, timeout=300):
     for _ in range(timeout):
         await RisingEdge(dut.clk)
         await ReadOnly()
@@ -59,7 +59,7 @@ async def run_config(dut, target_spad: int, ptr: int, rows: int, cols: int):
     await RisingEdge(dut.clk)
 
 
-async def run_load(dut, target_spad: int, memory: dict[int, int], timeout=300):
+async def run_load(dut, target_spad: int, memory: dict[int, int], timeout=1200):
     dut.instruction.value = encode_load(target_spad)
 
     for _ in range(timeout):
@@ -83,15 +83,14 @@ async def run_load(dut, target_spad: int, memory: dict[int, int], timeout=300):
     await RisingEdge(dut.clk)
 
 
-async def run_gemm(dut, spad_a: int, spad_b: int, spad_c: int, timeout=600):
+async def run_gemm(dut, spad_a: int, spad_b: int, spad_c: int, timeout=2500):
     dut.instruction.value = encode_gemm(spad_a, spad_b, spad_c)
 
     for cyc in range(timeout):
         await RisingEdge(dut.clk)
         await ReadOnly()
 
-        commit = int(dut.commit_en.value)
-        if commit == 1:
+        if int(dut.commit_en.value) == 1:
             break
     else:
         assert False, f"Timeout waiting for GEMM {spad_a} x {spad_b} -> {spad_c}"
@@ -101,7 +100,7 @@ async def run_gemm(dut, spad_a: int, spad_b: int, spad_c: int, timeout=600):
     await RisingEdge(dut.clk)
 
 
-async def run_store(dut, target_spad: int, written_memory: dict[int, int], timeout=300):
+async def run_store(dut, target_spad: int, written_memory: dict[int, int], timeout=1500):
     dut.instruction.value = encode_store(target_spad)
 
     for _ in range(timeout):
@@ -143,47 +142,46 @@ def check_written_matrix(
 
 
 @cocotb.test()
-async def test_chain_gemm_no_store_between(dut):
+async def test_gemm_8x8_8bit_input_32bit_output(dut):
     cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
 
-    # A and B chosen so all results stay under 256
     A = np.array([
-        [1, 2],
-        [3, 4],
+        [ 1,  2,  3,  4,  5,  6,  7,  8],
+        [ 9, 10, 11, 12, 13, 14, 15, 16],
+        [17, 18, 19, 20, 21, 22, 23, 24],
+        [25, 26, 27, 28, 29, 30, 31, 32],
+        [33, 34, 35, 36, 37, 38, 39, 40],
+        [41, 42, 43, 44, 45, 46, 47, 48],
+        [49, 50, 51, 52, 53, 54, 55, 56],
+        [57, 58, 59, 60, 61, 62, 63, 64],
     ], dtype=np.uint8)
 
     B = np.array([
-        [2, 0],
-        [1, 2],
+        [64, 63, 62, 61, 60, 59, 58, 57],
+        [56, 55, 54, 53, 52, 51, 50, 49],
+        [48, 47, 46, 45, 44, 43, 42, 41],
+        [40, 39, 38, 37, 36, 35, 34, 33],
+        [32, 31, 30, 29, 28, 27, 26, 25],
+        [24, 23, 22, 21, 20, 19, 18, 17],
+        [16, 15, 14, 13, 12, 11, 10,  9],
+        [ 8,  7,  6,  5,  4,  3,  2,  1],
     ], dtype=np.uint8)
 
-    # First GEMM: A @ B = C
     C = (A.astype(np.uint32) @ B.astype(np.uint32)).astype(np.uint32)
-
-    # Second GEMM: A @ C = D
-    D = (A.astype(np.uint32) @ C.astype(np.uint32)).astype(np.uint32)
-
-    C_u8 = (C & 0xFF).astype(np.uint8)
-    D_u8 = (D & 0xFF).astype(np.uint8)
 
     A_flat = A.flatten().tolist()
     B_flat = B.flatten().tolist()
-    C_flat = C_u8.flatten().tolist()
-    D_flat = D_u8.flatten().tolist()
+    C_flat = C.flatten().tolist()
 
-    memory = {
-        # A at 0x100
-        0x100: A_flat[0],
-        0x101: A_flat[1],
-        0x102: A_flat[2],
-        0x103: A_flat[3],
+    memory = {}
 
-        # B at 0x110
-        0x110: B_flat[0],
-        0x111: B_flat[1],
-        0x112: B_flat[2],
-        0x113: B_flat[3],
-    }
+    # A at 0x100..0x13F
+    for i, val in enumerate(A_flat):
+        memory[0x100 + i] = int(val)
+
+    # B at 0x200..0x23F
+    for i, val in enumerate(B_flat):
+        memory[0x200 + i] = int(val)
 
     written_memory = {}
 
@@ -198,36 +196,30 @@ async def test_chain_gemm_no_store_between(dut):
     dut.rst.value = 0
     await RisingEdge(dut.clk)
 
-    # spad0 = A
-    # spad1 = B
-    # spad2 = C
-    # spad3 = D
-    await run_config(dut, 0, 0x100, 2, 2)
-    await run_config(dut, 1, 0x110, 2, 2)
-    await run_config(dut, 2, 0x200, 2, 2)  # C destination
-    await run_config(dut, 3, 0x210, 2, 2)  # D destination
+    # spad0 = A, spad1 = B, spad2 = C
+    await run_config(dut, 0, 0x100, 8, 8)
+    await run_config(dut, 1, 0x200, 8, 8)
+    await run_config(dut, 2, 0x300, 8, 8)
 
-    # Load only A and B
+    # Load A and B
     await run_load(dut, 0, memory)
     await run_load(dut, 1, memory)
 
     check_spad_matrix(dut, 0, A_flat, "A")
     check_spad_matrix(dut, 1, B_flat, "B")
 
-    # First GEMM: A @ B = C into spad2
+    # GEMM
     await run_gemm(dut, 0, 1, 2)
+
+    # Check full 32-bit output in spad2
     check_spad_matrix(dut, 2, C_flat, "C")
 
-    # Second GEMM: A @ C = D into spad3
-    # Note: C is reused directly from spad2, no STORE/LOAD in between
-    await run_gemm(dut, 0, 2, 3)
-    check_spad_matrix(dut, 3, D_flat, "D")
+    # Store C back to memory
+    await run_store(dut, 2, written_memory)
 
-    # Only store final D if you want
-    await run_store(dut, 3, written_memory)
-    check_written_matrix(written_memory, 0x210, D_flat, "D")
+    check_written_matrix(written_memory, 0x300, C_flat, "C")
 
-    assert len(written_memory) == 4, f"Expected 4 writes for D, got {len(written_memory)}"
+    assert len(written_memory) == 64, f"Expected 64 writes for C, got {len(written_memory)}"
 
     print("A =")
     print(A)
@@ -235,5 +227,3 @@ async def test_chain_gemm_no_store_between(dut):
     print(B)
     print("C = A @ B =")
     print(C)
-    print("D = A @ C =")
-    print(D)
