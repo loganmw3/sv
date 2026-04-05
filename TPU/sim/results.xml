@@ -1,6 +1,0 @@
-<testsuites name="results">
-  <testsuite name="all" package="all">
-    <property name="random_seed" value="1775229878" />
-    <testcase name="test_chain_gemm_no_store_between" classname="test_gemm" file="/Users/loganwonnacott/Desktop/sv/TPU/tests/test_gemm.py" lineno="145" time="0.005300283432006836" sim_time_ns="1990.0" ratio_time="375451.619810175" />
-  </testsuite>
-</testsuites>
